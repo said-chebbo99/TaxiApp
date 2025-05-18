@@ -131,6 +131,9 @@ namespace ProjetInfo.Migrations
                     b.Property<DateTime?>("EndTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<double?>("EstimatedTimeMinutes")
+                        .HasColumnType("float");
+
                     b.Property<int?>("PaymentTransactionID")
                         .HasColumnType("int");
 
@@ -226,6 +229,9 @@ namespace ProjetInfo.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
 
                     b.Property<string>("Role")
                         .IsRequired()

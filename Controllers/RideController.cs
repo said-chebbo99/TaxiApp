@@ -10,272 +10,297 @@ using System.Threading.Tasks;
 
 namespace ProjetInfo.Controllers
 {
-    public class RideController : Controller
-    {
-        private readonly RideShareDbContext _context;
-        private readonly IHubContext<RideHub> _hubContext;
+	public class RideController : Controller
+	{
+		private readonly RideShareDbContext _context;
+		private readonly IHubContext<RideHub> _hubContext;
 
-        public RideController(RideShareDbContext context, IHubContext<RideHub> hubContext)
-        {
-            _context = context;
-            _hubContext = hubContext;
-        }
+		public RideController(RideShareDbContext context, IHubContext<RideHub> hubContext)
+		{
+			_context = context;
+			_hubContext = hubContext;
+		}
 
-        [HttpGet]
-        public IActionResult BookRide()
-        {
-            return View();
-        }
+		[HttpGet]
+		public IActionResult BookRide()
+		{
+			return View();
+		}
 
-        [HttpPost]
-        public IActionResult BookRide(string pickup, string dropoff, DateTime? scheduledDateTime)
-        {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var user = _context.Users.FirstOrDefault(u => u.Email == email);
-            if (user == null) return Unauthorized();
+		[HttpPost]
+		public IActionResult BookRide(string pickup, string dropoff, DateTime? scheduledDateTime, double distanceKm)
+		{
+			var email = User.FindFirst(ClaimTypes.Email)?.Value;
+			var user = _context.Users.FirstOrDefault(u => u.Email == email);
+			if (user == null) return Unauthorized();
 
-            bool isScheduled = scheduledDateTime.HasValue && scheduledDateTime.Value > DateTime.Now;
+			bool isScheduled = scheduledDateTime.HasValue && scheduledDateTime.Value > DateTime.Now;
 
-            var ride = new Ride
-            {
-                UserID = user.ID,
-                PickupLocation = pickup,
-                DropOffLocation = dropoff,
-                RideDateTime = DateTime.Now,
-                ScheduledDateTime = scheduledDateTime,
-                Status = "Pending"
-            };
+			double averageSpeedKmh = 40.0;
+			double estimatedTimeMinutes = (distanceKm / averageSpeedKmh) * 60;
 
-            _context.Rides.Add(ride);
-            _context.SaveChanges();
+			var ride = new Ride
+			{
+				UserID = user.ID,
+				PickupLocation = pickup,
+				DropOffLocation = dropoff,
+				RideDateTime = DateTime.Now,
+				ScheduledDateTime = scheduledDateTime,
+				Status = "Pending",
+				EstimatedTimeMinutes = estimatedTimeMinutes
+			};
 
-            return Json(new
-            {
-                rideId = ride.RideID,
-                message = isScheduled
-                    ? "✅ Ride scheduled! A driver can accept your ride from the available rides list."
-                    : "✅ Ride booked! A driver can accept your ride from the available rides list.",
-                driver = (object)null
-            });
-        }
+			_context.Rides.Add(ride);
+			_context.SaveChanges();
 
-        [HttpPost]
-        public IActionResult AssignDriversToScheduledRides()
-        {
-            var now = DateTime.Now;
-            var scheduledRides = _context.Rides
-                .Where(r => r.Status == "Pending" && r.ScheduledDateTime <= now && r.DriverID == null)
-                .ToList();
+			return Json(new
+			{
+				rideId = ride.RideID,
+				estimatedTimeMinutes = Math.Round(estimatedTimeMinutes, 1),
+				message = isScheduled
+					? "✅ Ride scheduled! A driver can accept your ride from the available rides list."
+					: "✅ Ride booked! A driver can accept your ride from the available rides list.",
+				driver = (object)null
+			});
+		}
 
-            foreach (var ride in scheduledRides)
-            {
-                var availableDriver = _context.Drivers
-                    .Include(d => d.User)
-                    .Include(d => d.Vehicles)
-                    .Where(d => d.Availability == true)
-                    .FirstOrDefault();
+		[HttpPost]
+		public IActionResult AssignDriversToScheduledRides()
+		{
+			var now = DateTime.Now;
+			var scheduledRides = _context.Rides
+				.Where(r => r.Status == "Pending" && r.ScheduledDateTime <= now && r.DriverID == null)
+				.ToList();
 
-                if (availableDriver != null)
-                {
-                    ride.DriverID = availableDriver.DriverID;
-                    ride.Status = "Accepted";
-                    availableDriver.Availability = false;
-                }
-            }
+			foreach (var ride in scheduledRides)
+			{
+				var availableDriver = _context.Drivers
+					.Include(d => d.User)
+					.Include(d => d.Vehicles)
+					.Where(d => d.Availability == true)
+					.FirstOrDefault();
 
-            _context.SaveChanges();
-            return Ok("Drivers assigned to scheduled rides.");
-        }
+				if (availableDriver != null)
+				{
+					ride.DriverID = availableDriver.DriverID;
+					ride.Status = "Accepted";
+					availableDriver.Availability = false;
+				}
+			}
 
-        [HttpGet]
-        public IActionResult GetAvailableDrivers()
-        {
-            var drivers = _context.Drivers
-                .Where(d => d.Availability == true && d.Latitude != null && d.Longitude != null)
-                .Select(d => new
-                {
-                    id = d.DriverID,
-                    name = d.User.FullName,
-                    lat = d.Latitude,
-                    lng = d.Longitude
-                })
-                .ToList();
+			_context.SaveChanges();
+			return Ok("Drivers assigned to scheduled rides.");
+		}
 
-            return Json(drivers);
-        }
+		[HttpGet]
+		public IActionResult GetAvailableDrivers()
+		{
+			var drivers = _context.Drivers
+				.Where(d => d.Availability == true && d.Latitude != null && d.Longitude != null)
+				.Select(d => new
+				{
+					id = d.DriverID,
+					name = d.User.FullName,
+					lat = d.Latitude,
+					lng = d.Longitude
+				})
+				.ToList();
 
-        [HttpGet]
-        public IActionResult GetDriverLocation(int driverId)
-        {
-            var driver = _context.Drivers.FirstOrDefault(d => d.DriverID == driverId);
-            if (driver == null) return NotFound();
+			return Json(drivers);
+		}
 
-            return Json(new { lat = driver.Latitude, lng = driver.Longitude });
-        }
+		[HttpGet]
+		public IActionResult GetDriverLocation(int driverId)
+		{
+			var driver = _context.Drivers.FirstOrDefault(d => d.DriverID == driverId);
+			if (driver == null) return NotFound();
 
-        [HttpPost]
-        public IActionResult RateDriver(int driverId, int rating)
-        {
-            var userId = _context.Users.First().ID; // Replace with session/JWT logic
+			return Json(new { lat = driver.Latitude, lng = driver.Longitude });
+		}
 
-            var feedback = new RideFeedback
-            {
-                UserID = userId,
-                DriverID = driverId,
-                Rating = rating,
-                Comments = ""
-            };
+		[HttpPost]
+		public IActionResult RateDriver(int driverId, int rating)
+		{
+			var userId = _context.Users.First().ID;
 
-            _context.RideFeedbacks.Add(feedback);
-            _context.SaveChanges();
+			var feedback = new RideFeedback
+			{
+				UserID = userId,
+				DriverID = driverId,
+				Rating = rating,
+				Comments = ""
+			};
 
-            return Ok("Rating saved!");
-        }
+			_context.RideFeedbacks.Add(feedback);
+			_context.SaveChanges();
 
-        [HttpPost]
-        [HttpPost]
-        public IActionResult Rate(int driverId, int rating, string comment)
-        {
-            var user = _context.Users.FirstOrDefault();
-            if (user == null)
-                return BadRequest("User not found.");
+			return Ok("Rating saved!");
+		}
 
-            var ride = _context.Rides
-                .Where(r => r.DriverID == driverId && r.UserID == user.ID)
-                .OrderByDescending(r => r.StartTime)
-                .FirstOrDefault();
+		[HttpPost]
+		public IActionResult Rate(int driverId, int rating, string comment)
+		{
+			var user = _context.Users.FirstOrDefault();
+			if (user == null)
+				return BadRequest("User not found.");
 
-            if (ride == null)
-                return BadRequest("Ride not found to attach feedback.");
+			var ride = _context.Rides
+				.Where(r => r.DriverID == driverId && r.UserID == user.ID)
+				.OrderByDescending(r => r.StartTime)
+				.FirstOrDefault();
 
-            var feedback = new RideFeedback
-            {
-                RideID = ride.RideID,
-                DriverID = driverId,
-                UserID = user.ID,
-                Rating = rating,
-                Comments = comment ?? ""
-            };
+			if (ride == null)
+				return BadRequest("Ride not found to attach feedback.");
 
-            _context.RideFeedbacks.Add(feedback);
-            _context.SaveChanges();
+			var feedback = new RideFeedback
+			{
+				RideID = ride.RideID,
+				DriverID = driverId,
+				UserID = user.ID,
+				Rating = rating,
+				Comments = comment ?? ""
+			};
 
-            return Ok(new { success = true });
-        }
+			_context.RideFeedbacks.Add(feedback);
+			_context.SaveChanges();
 
+			return Ok(new { success = true });
+		}
 
+		[HttpGet]
+		public IActionResult AvailableRides()
+		{
+			return View();
+		}
 
+		[HttpGet]
+		public IActionResult GetAvailableRides()
+		{
+			var rides = _context.Rides
+				.Include(r => r.User)
+				.Where(r => r.DriverID == null && r.Status == "Pending")
+				.Select(r => new
+				{
+					rideID = r.RideID,
+					pickupLocation = r.PickupLocation,
+					dropOffLocation = r.DropOffLocation,
+					rideDateTime = r.RideDateTime,
+					estimatedTimeMinutes = r.EstimatedTimeMinutes
+				})
+				.ToList();
 
-        [HttpGet]
-        public IActionResult AvailableRides()
-        {
-            return View();
-        }
+			return Json(rides);
+		}
 
-        [HttpGet]
-        public IActionResult GetAvailableRides()
-        {
-            var rides = _context.Rides
-                .Include(r => r.User)
-                .Where(r => r.DriverID == null && r.Status == "Pending")
-                .Select(r => new
-                {
-                    rideID = r.RideID,
-                    pickupLocation = r.PickupLocation,
-                    dropOffLocation = r.DropOffLocation,
-                    rideDateTime = r.RideDateTime
-                })
-                .ToList();
+		[HttpPost]
+		public async Task<IActionResult> AcceptRide(int rideId)
+		{
+			var email = User.FindFirst(ClaimTypes.Email)?.Value;
+			var user = _context.Users.FirstOrDefault(u => u.Email == email);
+			if (user == null || user.Role != "driver") return Unauthorized();
 
-            return Json(rides);
-        }
+			var driver = _context.Drivers.FirstOrDefault(d => d.UserID == user.ID);
+			if (driver == null) return NotFound();
 
+			var ride = _context.Rides.FirstOrDefault(r => r.RideID == rideId);
+			if (ride == null || ride.Status != "Pending") return NotFound();
 
-        [HttpPost]
-        public async Task<IActionResult> AcceptRide(int rideId)
-        {
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
-            var user = _context.Users.FirstOrDefault(u => u.Email == email);
-            if (user == null || user.Role != "driver") return Unauthorized();
+			ride.DriverID = driver.DriverID;
+			ride.Status = "InProgress";
+			ride.StartTime = DateTime.Now;
+			driver.Availability = false;
 
-            var driver = _context.Drivers.FirstOrDefault(d => d.UserID == user.ID);
-            if (driver == null) return NotFound();
+			if (!string.IsNullOrEmpty(ride.PickupLocation) && ride.PickupLocation.Contains(","))
+			{
+				var parts = ride.PickupLocation.Split(',');
+				if (parts.Length == 2 &&
+					double.TryParse(parts[0], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lat) &&
+					double.TryParse(parts[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lng))
+				{
+					driver.Latitude = lat;
+					driver.Longitude = lng;
+				}
+			}
 
-            var ride = _context.Rides.FirstOrDefault(r => r.RideID == rideId);
-            if (ride == null || ride.Status != "Pending") return NotFound();
+			_context.SaveChanges();
 
-            ride.DriverID = driver.DriverID;
-            ride.Status = "InProgress";
-            ride.StartTime = DateTime.Now;
-            driver.Availability = false;
+			await _hubContext.Clients.Group($"ride-{rideId}").SendAsync("ReceiveRideStatus", "InProgress");
 
-            // --- FIX: Set driver's location to pickup location ---
-            // Parse pickup location as "lat,lng"
-            if (!string.IsNullOrEmpty(ride.PickupLocation) && ride.PickupLocation.Contains(","))
-            {
-                var parts = ride.PickupLocation.Split(',');
-                if (parts.Length == 2 &&
-                    double.TryParse(parts[0], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lat) &&
-                    double.TryParse(parts[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double lng))
-                {
-                    driver.Latitude = lat;
-                    driver.Longitude = lng;
-                }
-            }
+			return Ok();
+		}
 
-            _context.SaveChanges();
+		[HttpPost]
+		public async Task<IActionResult> CompleteRide(int rideId)
+		{
+			var ride = _context.Rides.Include(r => r.User).FirstOrDefault(r => r.RideID == rideId);
+			if (ride == null || ride.Status != "InProgress") return NotFound();
 
-            // SignalR: notify all clients in this ride group
-            await _hubContext.Clients.Group($"ride-{rideId}").SendAsync("ReceiveRideStatus", "InProgress");
+			ride.Status = "Completed";
+			ride.EndTime = DateTime.Now;
 
-            return Ok();
-        }
+			var user = ride.User;
+			if (user != null)
+			{
+				user.Points += 10; // Award 10 points per ride
+			}
 
+			var driver = _context.Drivers.FirstOrDefault(d => d.DriverID == ride.DriverID);
+			if (driver != null)
+			{
+				driver.Availability = true;
+			}
 
-        [HttpGet]
-        public IActionResult GetRideStatus(int rideId)
-        {
-            var ride = _context.Rides
-                .Include(r => r.Driver)
-                    .ThenInclude(d => d.User)
-                .Include(r => r.Driver)
-                    .ThenInclude(d => d.Vehicles)
-                .FirstOrDefault(r => r.RideID == rideId);
+			_context.SaveChanges();
 
-            if (ride == null || ride.Driver == null)
-                return Json(new { status = ride?.Status ?? "Unknown" });
+			await _hubContext.Clients.Group($"ride-{rideId}").SendAsync("ReceiveRideStatus", "Completed");
 
-            var driver = ride.Driver;
-            var user = driver.User;
-            var vehicle = driver.Vehicles?.FirstOrDefault();
+			return Ok(new { message = "Ride completed and points awarded!" });
+		}
 
-            // Calculate average rating
-            var rating = _context.RideFeedbacks
-                .Where(f => f.DriverID == driver.DriverID)
-                .Select(f => (double?)f.Rating)
-                .DefaultIfEmpty()
-                .Average();
+		[HttpGet]
+		public IActionResult GetRideStatus(int rideId)
+		{
+			var ride = _context.Rides
+				.Include(r => r.Driver)
+					.ThenInclude(d => d.User)
+				.Include(r => r.Driver)
+					.ThenInclude(d => d.Vehicles)
+				.FirstOrDefault(r => r.RideID == rideId);
 
-            return Json(new
-            {
-                status = ride.Status,
-                driver = new
-                {
-                    id = driver.DriverID,
-                    name = user?.FullName ?? "",
-                    phone = user?.PhoneNumber ?? "",
-                    carModel = vehicle != null ? $"{vehicle.Brand} {vehicle.Model}" : "",
-                    plate = vehicle?.PlateNumber ?? "",
-                    rating = rating.HasValue ? Math.Round(rating.Value, 2) : (double?)null,
-                    lat = driver.Latitude,
-                    lng = driver.Longitude
-                }
-            });
-        }
+			if (ride == null || ride.Driver == null)
+				return Json(new { status = ride?.Status ?? "Unknown" });
 
-        public IActionResult AboutUs()
-        {
-            return View();
-        }
-    }
+			var driver = ride.Driver;
+			var user = driver.User;
+			var vehicle = driver.Vehicles?.FirstOrDefault();
+
+			var rating = _context.RideFeedbacks
+				.Where(f => f.DriverID == driver.DriverID)
+				.Select(f => (double?)f.Rating)
+				.DefaultIfEmpty()
+				.Average();
+
+			return Json(new
+			{
+				status = ride.Status,
+				estimatedTimeMinutes = ride.EstimatedTimeMinutes,
+				driver = new
+				{
+					id = driver.DriverID,
+					name = user?.FullName ?? "",
+					phone = user?.PhoneNumber ?? "",
+					carModel = vehicle != null ? $"{vehicle.Brand} {vehicle.Model}" : "",
+					plate = vehicle?.PlateNumber ?? "",
+					rating = rating.HasValue ? Math.Round(rating.Value, 2) : (double?)null,
+					lat = driver.Latitude,
+					lng = driver.Longitude
+				}
+			});
+		}
+
+		public IActionResult AboutUs()
+		{
+			return View();
+		}
+	}
 }

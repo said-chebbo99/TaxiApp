@@ -8,6 +8,8 @@
     ".NETCoreApp,Version=v8.0": {
       "ProjetInfo/1.0.0": {
         "dependencies": {
+          "Microsoft.AspNetCore.Authentication.Facebook": "8.0.5",
+          "Microsoft.AspNetCore.Authentication.Google": "8.0.5",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "8.0.4",
           "Microsoft.AspNetCore.SignalR": "1.2.0",
           "Microsoft.EntityFrameworkCore": "9.0.3",
@@ -599,6 +601,22 @@
           "Microsoft.AspNetCore.Http.Abstractions": "2.3.0",
           "Microsoft.Extensions.Logging.Abstractions": "9.0.3",
           "Microsoft.Extensions.Options": "9.0.3"
+        }
+      },
+      "Microsoft.AspNetCore.Authentication.Facebook/8.0.5": {
+        "runtime": {
+          "lib/net8.0/Microsoft.AspNetCore.Authentication.Facebook.dll": {
+            "assemblyVersion": "8.0.5.0",
+            "fileVersion": "8.0.524.22404"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Authentication.Google/8.0.5": {
+        "runtime": {
+          "lib/net8.0/Microsoft.AspNetCore.Authentication.Google.dll": {
+            "assemblyVersion": "8.0.5.0",
+            "fileVersion": "8.0.524.22404"
+          }
         }
       },
       "Microsoft.AspNetCore.Authentication.JwtBearer/8.0.4": {
@@ -2621,6 +2639,20 @@
       "sha512": "sha512-ve6uvLwKNRkfnO/QeN9M8eUJ49lCnWv/6/9p6iTEuiI6Rtsz+myaBAjdMzLuTViQY032xbTF5AdZF5BJzJJyXQ==",
       "path": "microsoft.aspnetcore.authentication.abstractions/2.3.0",
       "hashPath": "microsoft.aspnetcore.authentication.abstractions.2.3.0.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Authentication.Facebook/8.0.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-drsQxV//y6MimrqETLN6rgTa9oBWjkiJkU6dEwvHhlB0UEyFlRLEBasoG7TF5TuZbZgCDDpdq00V1tmdLsy8Dg==",
+      "path": "microsoft.aspnetcore.authentication.facebook/8.0.5",
+      "hashPath": "microsoft.aspnetcore.authentication.facebook.8.0.5.nupkg.sha512"
+    },
+    "Microsoft.AspNetCore.Authentication.Google/8.0.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-E9gxy1BzCAQ04n7rVSbPe2bZux2zSaCEY63am3W2abaEikdxCKeai+rj34U++/uYybaAoprG39CikVhYL4imKg==",
+      "path": "microsoft.aspnetcore.authentication.google/8.0.5",
+      "hashPath": "microsoft.aspnetcore.authentication.google.8.0.5.nupkg.sha512"
     },
     "Microsoft.AspNetCore.Authentication.JwtBearer/8.0.4": {
       "type": "package",

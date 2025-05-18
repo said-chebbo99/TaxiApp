@@ -1,15 +1,17 @@
 ﻿@{
     Layout = null;
     ViewData["Title"] = "Sign Up - QuickCab";
+    var signUpSuccess = TempData["SignUpSuccess"] as string;
 }
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-    <title>Sign Up | QuickCab</title>
+    <title>@ViewData["Title"]</title>
     <link rel="stylesheet" type="text/css" href="/css/SignUp.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <div class="main">
@@ -29,15 +31,12 @@
                 <input class="form__input" type="number" placeholder="Phone" name="PhoneNumber" required />
                 <input class="form__input" type="password" placeholder="Password" name="Password" required />
 
-                <!-- Driver fields -->
-                <div id="driverFields">
+                <div id="driverFields" style="display:none;">
                     <input class="form__input" type="text" placeholder="Car Model" name="CarModel" />
                     <input class="form__input" type="text" placeholder="License Plate" name="LicensePlate" />
                 </div>
 
                 <button class="form__button button submit" type="submit">SIGN UP</button>
-
-
             </form>
         </div>
 
@@ -46,16 +45,26 @@
             <form id="b-form" class="form" method="post" action="/Account/SignIn">
                 <h2 class="form_title title">Sign in to Website</h2>
                 <div class="form__icons">
-                    <img class="form__icon" src="/images/icon-facebook.svg" alt="" />
-                    <img class="form__icon" src="/images/icon-google.svg" alt="" />
-                    <img class="form__icon" src="/images/icon-twitter.svg" alt="" />
+                    <a href="/signin-google">
+                        <img class="form__icon" src="/images/icon-google.svg" alt="Google" />
+                    </a>
                 </div>
+
                 <span class="form__span">or use your email account</span>
-                <input class="form__input" type="email" placeholder="Email" name="Email" required />
+                <input class="form__input" type="email" placeholder="Email" name="Email" required autofocus />
                 <input class="form__input" type="password" placeholder="Password" name="Password" required />
+
+                <label style="display:flex; align-items:center; margin: 15px 0;">
+                    <input type="checkbox" name="RememberMe" style="margin-right: 8px;" />
+                    Remember Me
+                </label>
+
                 <button class="form__button button submit" type="submit">SIGN IN</button>
 
-
+                @if (TempData["SignInError"] != null)
+                {
+                    <div style="color:red; margin-top:10px;">@TempData["SignInError"]</div>
+                }
             </form>
         </div>
 
@@ -76,12 +85,9 @@
             </div>
         </div>
     </div>
-    @if (TempData["Success"] != null)
-    {
-        <div id="signup-success" data-message="@TempData["Success"]"></div>
-    }
 
     <script>
+        // Switch animation logic
         let switchCtn = document.querySelector("#switch-cnt");
         let switchC1 = document.querySelector("#switch-c1");
         let switchC2 = document.querySelector("#switch-c2");
@@ -108,25 +114,46 @@
         };
 
         window.addEventListener("load", () => {
+            // Switch form animation
             for (let i = 0; i < switchBtn.length; i++) {
                 switchBtn[i].addEventListener("click", function (e) {
                     e.preventDefault();
                     changeForm();
                 });
             }
-        });
 
-        const roleSelector = document.getElementById("roleSelector");
-        const driverFields = document.getElementById("driverFields");
+            // Show driver fields if role is "driver"
+            const roleSelector = document.getElementById("roleSelector");
+            const driverFields = document.getElementById("driverFields");
 
-        roleSelector.addEventListener("change", function () {
-            if (this.value === "driver") {
-                driverFields.style.display = "block";
-            } else {
-                driverFields.style.display = "none";
+            if (roleSelector) {
+                roleSelector.addEventListener("change", function () {
+                    driverFields.style.display = this.value === "driver" ? "block" : "none";
+                });
+
+                if (roleSelector.value === "driver") {
+                    driverFields.style.display = "block";
+                }
+            }
+
+            // ✅ Show toast if signup success
+            const signUpSuccess = @Html.Raw(Json.Serialize(signUpSuccess));
+            if (signUpSuccess) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: signUpSuccess,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+
+                // Switch to Sign In view
+                changeForm();
             }
         });
-
     </script>
 </body>
 </html>

@@ -1,122 +1,126 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using ProjetInfo.Data;
 using ProjetInfo.Models;
 
+
 namespace ProjetInfo
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
+			var builder = WebApplication.CreateBuilder(args);
 
-            builder.Services.AddSignalR();
+			builder.Services.AddSignalR();
 
-            // Secret JWT key (you can move this to appsettings.json later)
-            var key = "this_is_a_very_secure_and_long_jwt_key_123456";
+			var key = "this_is_a_very_secure_and_long_jwt_key_123456";
 
-            // Add services to container
-            builder.Services.AddControllersWithViews();
-            builder.Services.AddSession();
-            builder.Services.AddHttpContextAccessor();
+			builder.Services.AddControllersWithViews();
+			builder.Services.AddSession();
+			builder.Services.AddHttpContextAccessor();
 
-            builder.Services.AddDbContext<RideShareDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+			builder.Services.AddDbContext<RideShareDbContext>(options =>
+				options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-            // ✅ Configure JWT Authentication (BEFORE builder.Build())
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
-                };
+			// 🔐 External Authentication (Google & Facebook)
+			builder.Services.AddAuthentication(options =>
+			{
+				options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+				options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+			})
+			// 🔑 JWT for internal token auth
+			.AddJwtBearer(options =>
+			{
+				options.TokenValidationParameters = new TokenValidationParameters
+				{
+					ValidateIssuer = false,
+					ValidateAudience = false,
+					ValidateLifetime = true,
+					ValidateIssuerSigningKey = true,
+					IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key))
+				};
 
-                // ✅ Tell ASP.NET to read token from cookie
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        if (context.Request.Cookies.ContainsKey("jwt"))
-                        {
-                            context.Token = context.Request.Cookies["jwt"];
-                        }
-                        return Task.CompletedTask;
-                    }
-                };
-            });
+				options.Events = new JwtBearerEvents
+				{
+					OnMessageReceived = context =>
+					{
+						if (context.Request.Cookies.ContainsKey("jwt"))
+						{
+							context.Token = context.Request.Cookies["jwt"];
+						}
+						return Task.CompletedTask;
+					}
+				};
+			})
+			// 🌐 Google Login
+			.AddGoogle(googleOptions =>
+			{
+				googleOptions.ClientId = "327744417287-3qg9lvv0bkmgd131s49c6os6vsjeik39.apps.googleusercontent.com";
+				googleOptions.ClientSecret = "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";
+			});
+			
 
-            builder.Services.AddAuthorization();
+			builder.Services.AddAuthorization();
 
-            var app = builder.Build();
+			var app = builder.Build();
 
-            app.MapHub<RideHub>("/rideHub");
+			app.MapHub<RideHub>("/rideHub");
 
-            // Middleware
-            if (!app.Environment.IsDevelopment())
-            {
-                app.UseExceptionHandler("/Home/Error");
-                app.UseHsts();
-            }
+			if (!app.Environment.IsDevelopment())
+			{
+				app.UseExceptionHandler("/Home/Error");
+				app.UseHsts();
+			}
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
+			app.UseHttpsRedirection();
+			app.UseStaticFiles();
+			app.UseRouting();
 
-            app.UseRouting();
+			app.UseAuthentication(); // ✅
+			app.UseAuthorization();
+			app.UseSession();
 
-            app.UseAuthentication(); // 👈 must come before authorization
-            app.UseAuthorization();
+			app.MapControllerRoute(
+				name: "default",
+				pattern: "{controller=Account}/{action=SignUp}/{id?}");
 
-            app.UseSession();
+			// 🧪 Seed test driver
+			using (var scope = app.Services.CreateScope())
+			{
+				var db = scope.ServiceProvider.GetRequiredService<RideShareDbContext>();
 
-            // Route
-            app.MapControllerRoute(
-                name: "default",
-                pattern: "{controller=Account}/{action=SignUp}/{id?}");
+				if (!db.Users.Any(u => u.Role == "driver"))
+				{
+					var driverUser = new User
+					{
+						FullName = "Ali Kassem",
+						Email = "ali@example.com",
+						PhoneNumber = "71123456",
+						Password = "1234",
+						Role = "driver"
+					};
 
-            // ✅ OPTIONAL: Seed test driver if none exist
-            using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<RideShareDbContext>();
+					db.Users.Add(driverUser);
+					db.SaveChanges();
 
-                if (!db.Users.Any(u => u.Role == "driver"))
-                {
-                    var driverUser = new User
-                    {
-                        FullName = "Ali Kassem",
-                        Email = "ali@example.com",
-                        PhoneNumber = "71123456",
-                        Password = "1234",
-                        Role = "driver"
-                    };
+					var driver = new Driver
+					{
+						UserID = driverUser.ID,
+						LicenseNumber = "XYZ123",
+						Availability = true
+					};
 
-                    db.Users.Add(driverUser);
-                    db.SaveChanges();
+					db.Drivers.Add(driver);
+					db.SaveChanges();
+				}
+			}
 
-                    var driver = new Driver
-                    {
-                        UserID = driverUser.ID,
-                        LicenseNumber = "XYZ123",
-                        Availability = true
-                    };
-
-                    db.Drivers.Add(driver);
-                    db.SaveChanges();
-                }
-            }
-
-            app.Run();
-        }
-    }
+			app.Run();
+		}
+	}
 }

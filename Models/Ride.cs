@@ -18,7 +18,9 @@
         public PaymentTransaction PaymentTransaction { get; set; }
         public ICollection<RideFeedback> RideFeedbacks { get; set; }
         public DateTime RideDateTime { get; set; }
+		public double? EstimatedTimeMinutes { get; set; }
 
-    }
+
+	}
 
 }

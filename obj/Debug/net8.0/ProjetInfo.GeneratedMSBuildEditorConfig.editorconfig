@@ -17,65 +17,65 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = ProjetInfo
 build_property.RootNamespace = ProjetInfo
-build_property.ProjectDir = C:\Users\DELL\ProjetInfo\
+build_property.ProjectDir = C:\Users\saids\Downloads\TaxiProject\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 8.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Users\DELL\ProjetInfo
+build_property.MSBuildProjectDirectory = C:\Users\saids\Downloads\TaxiProject
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 8.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/DELL/ProjetInfo/Views/Account/AboutUs.cshtml]
+[C:/Users/saids/Downloads/TaxiProject/Views/Account/AboutUs.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxBYm91dFVzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/DELL/ProjetInfo/Views/Account/Profile.cshtml]
+[C:/Users/saids/Downloads/TaxiProject/Views/Account/Profile.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxQcm9maWxlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/DELL/ProjetInfo/Views/Account/SignUp.cshtml]
+[C:/Users/saids/Downloads/TaxiProject/Views/Account/SignUp.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxTaWduVXAuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/DELL/ProjetInfo/Views/Contact/Index.cshtml]
+[C:/Users/saids/Downloads/TaxiProject/Views/Contact/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udGFjdFxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/DELL/ProjetInfo/Views/Home/Index.cshtml]
+[C:/Users/saids/Downloads/TaxiProject/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/DELL/ProjetInfo/Views/Home/Privacy.cshtml]
+[C:/Users/saids/Downloads/TaxiProject/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/DELL/ProjetInfo/Views/Ride/AvailableRides.cshtml]
+[C:/Users/saids/Downloads/TaxiProject/Views/Ride/AvailableRides.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmlkZVxBdmFpbGFibGVSaWRlcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/DELL/ProjetInfo/Views/Ride/BookRide.cshtml]
+[C:/Users/saids/Downloads/TaxiProject/Views/Ride/BookRide.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmlkZVxCb29rUmlkZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/DELL/ProjetInfo/Views/Shared/Error.cshtml]
+[C:/Users/saids/Downloads/TaxiProject/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/DELL/ProjetInfo/Views/Shared/_ValidationScriptsPartial.cshtml]
+[C:/Users/saids/Downloads/TaxiProject/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/DELL/ProjetInfo/Views/_ViewImports.cshtml]
+[C:/Users/saids/Downloads/TaxiProject/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/DELL/ProjetInfo/Views/_ViewStart.cshtml]
+[C:/Users/saids/Downloads/TaxiProject/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/DELL/ProjetInfo/Views/Shared/_Layout.cshtml]
+[C:/Users/saids/Downloads/TaxiProject/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-y2wfufvx4d

@@ -42,5 +42,7 @@ namespace ProjetInfo.Models
             PaymentTransactions = new HashSet<PaymentTransaction>();
             RideFeedbacks = new HashSet<RideFeedback>();
         }
-    }
+		public int Points { get; set; } = 0;
+
+	}
 }
