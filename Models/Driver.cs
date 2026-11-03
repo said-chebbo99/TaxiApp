@@ -19,6 +19,6 @@ namespace ProjetInfo.Models
         public virtual ICollection<Vehicle> Vehicles { get; set; } = new List<Vehicle>();
         public virtual ICollection<Ride> Rides { get; set; } = new List<Ride>();
         public virtual ICollection<RideFeedback> DriverFeedbacks { get; set; }
-
-    }
+		public double AverageRating { get; set; }
+	}
 }

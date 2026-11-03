@@ -1,114 +1,172 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProjetInfo.Models;
-using System.Collections.Generic;
 using System.Reflection.Emit;
 
 namespace ProjetInfo.Data
 {
+	public class RideShareDbContext : DbContext
+	{
+		public RideShareDbContext(DbContextOptions<RideShareDbContext> options)
+			: base(options)
+		{
+		}
 
-    public class RideShareDbContext : DbContext
-    {
-        public RideShareDbContext(DbContextOptions<RideShareDbContext> options)
-        : base(options)
-        {
-        }
+		// DbSets for all entities
+		public DbSet<User> Users { get; set; }
+		public DbSet<Driver> Drivers { get; set; }
+		public DbSet<Vehicle> Vehicles { get; set; }
+		public DbSet<UserPreferences> UserPreferences { get; set; }
+		public DbSet<Ride> Rides { get; set; }
+		public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
+		public DbSet<RideFeedback> RideFeedbacks { get; set; }
+		public DbSet<Contact> Contacts { get; set; }
+		public DbSet<ChatMessage> ChatMessages { get; set; }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<Driver> Drivers { get; set; }
-        public DbSet<Vehicle> Vehicles { get; set; }
-        public DbSet<UserPreferences> UserPreferences { get; set; }
-        public DbSet<Ride> Rides { get; set; }
-        public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
-        public DbSet<RideFeedback> RideFeedbacks { get; set; }
-        public DbSet<Contact> Contacts { get; set; }
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			base.OnModelCreating(modelBuilder);
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<User>()
-                .HasKey(u => u.ID);
+			// User configuration
+			modelBuilder.Entity<User>(entity =>
+			{
+				entity.HasKey(u => u.ID);
+				entity.HasIndex(u => u.Email).IsUnique();
 
-            // Vehicle configuration
-            modelBuilder.Entity<Vehicle>()
-                .HasKey(v => v.VehicleID);
+				entity.HasMany(u => u.ChatMessages)
+					.WithOne(cm => cm.Sender)
+					.HasForeignKey(cm => cm.SenderID)
+					.OnDelete(DeleteBehavior.ClientNoAction);
+			});
 
-            modelBuilder.Entity<Vehicle>()
-                .HasOne(v => v.Driver)
-                .WithMany(d => d.Vehicles)
-                .HasForeignKey(v => v.DriverID)
-                .OnDelete(DeleteBehavior.NoAction); // Prevent multiple cascade paths
+			// Vehicle configuration
+			modelBuilder.Entity<Vehicle>(entity =>
+			{
+				entity.HasKey(v => v.VehicleID);
+				entity.HasIndex(v => v.PlateNumber).IsUnique();
 
-            // UserPreferences configuration
-            modelBuilder.Entity<UserPreferences>()
-                .HasKey(up => up.PreferenceID);
+				entity.HasOne(v => v.Driver)
+					.WithMany(d => d.Vehicles)
+					.HasForeignKey(v => v.DriverID)
+					.OnDelete(DeleteBehavior.NoAction);
+			});
 
-            modelBuilder.Entity<UserPreferences>()
-                .HasOne(up => up.User)
-                .WithOne(u => u.UserPreferences)
-                .HasForeignKey<UserPreferences>(up => up.UserID)
-                .OnDelete(DeleteBehavior.Cascade);
+			// UserPreferences configuration
+			modelBuilder.Entity<UserPreferences>(entity =>
+			{
+				entity.HasKey(up => up.PreferenceID);
 
-            // Ride configuration
-            modelBuilder.Entity<Ride>()
-                .HasKey(r => r.RideID);
+				entity.HasOne(up => up.User)
+					.WithOne(u => u.UserPreferences)
+					.HasForeignKey<UserPreferences>(up => up.UserID)
+					.OnDelete(DeleteBehavior.Cascade);
+			});
 
-            modelBuilder.Entity<Ride>()
-                .HasOne(r => r.User)
-                .WithMany(u => u.Rides)
-                .HasForeignKey(r => r.UserID)
-                .OnDelete(DeleteBehavior.NoAction);
+			// Ride configuration
+			modelBuilder.Entity<Ride>(entity =>
+			{
+				entity.HasKey(r => r.RideID);
 
-            modelBuilder.Entity<Ride>()
-                .HasOne(r => r.Driver)
-                .WithMany(d => d.Rides)
-                .HasForeignKey(r => r.DriverID)
-                .OnDelete(DeleteBehavior.NoAction);
+				entity.HasMany(r => r.ChatMessages)
+					.WithOne(cm => cm.Ride)
+					.HasForeignKey(cm => cm.RideID)
+					.OnDelete(DeleteBehavior.ClientCascade);
 
-            modelBuilder.Entity<Ride>()
-                .HasOne(r => r.PaymentTransaction)
-                .WithMany(pt => pt.Rides)
-                .HasForeignKey(r => r.PaymentTransactionID)
-                .OnDelete(DeleteBehavior.NoAction);
+				entity.HasOne(r => r.User)
+					.WithMany(u => u.Rides)
+					.HasForeignKey(r => r.UserID)
+					.OnDelete(DeleteBehavior.NoAction);
 
-            // PaymentTransaction configuration
-            modelBuilder.Entity<PaymentTransaction>()
-                .HasKey(pt => pt.TransactionID);
+				entity.HasOne(r => r.Driver)
+					.WithMany(d => d.Rides)
+					.HasForeignKey(r => r.DriverID)
+					.OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<PaymentTransaction>()
-                .HasOne(pt => pt.User)
-                .WithMany(u => u.PaymentTransactions)
-                .HasForeignKey(pt => pt.UserID)
-                .OnDelete(DeleteBehavior.NoAction);
+				entity.HasOne(r => r.PaymentTransaction)
+					.WithMany(pt => pt.Rides)
+					.HasForeignKey(r => r.PaymentTransactionID)
+					.OnDelete(DeleteBehavior.NoAction);
+			});
 
-            // RideFeedback configuration
-            modelBuilder.Entity<RideFeedback>()
-                .HasKey(rf => rf.FeedbackID);
+			// PaymentTransaction configuration
+			modelBuilder.Entity<PaymentTransaction>(entity =>
+			{
+				entity.HasKey(pt => pt.TransactionID);
 
-            modelBuilder.Entity<RideFeedback>()
-                .HasOne(rf => rf.Ride)
-                .WithMany(r => r.RideFeedbacks)
-                .HasForeignKey(rf => rf.RideID)
-                .OnDelete(DeleteBehavior.NoAction);
+				entity.HasOne(pt => pt.User)
+					.WithMany(u => u.PaymentTransactions)
+					.HasForeignKey(pt => pt.UserID)
+					.OnDelete(DeleteBehavior.NoAction);
+			});
 
-            modelBuilder.Entity<RideFeedback>()
-                .HasOne(rf => rf.User)
-                .WithMany(u => u.RideFeedbacks)
-                .HasForeignKey(rf => rf.UserID)
-                .OnDelete(DeleteBehavior.NoAction);
+			// RideFeedback configuration
+			modelBuilder.Entity<RideFeedback>(entity =>
+			{
+				entity.HasKey(rf => rf.FeedbackID);
 
-            modelBuilder.Entity<RideFeedback>()
-                .HasOne(rf => rf.Driver)
-                .WithMany(d => d.DriverFeedbacks)
-                .HasForeignKey(rf => rf.DriverID)
-                .OnDelete(DeleteBehavior.NoAction);
+				entity.HasOne(rf => rf.Ride)
+					.WithMany(r => r.RideFeedbacks)
+					.HasForeignKey(rf => rf.RideID)
+					.OnDelete(DeleteBehavior.NoAction);
 
-            // Add indexes for performance
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.Email)
-                .IsUnique();
+				entity.HasOne(rf => rf.User)
+					.WithMany(u => u.RideFeedbacks)
+					.HasForeignKey(rf => rf.UserID)
+					.OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Vehicle>()
-                .HasIndex(v => v.PlateNumber)
-                .IsUnique();
-        }
-    }
+				entity.HasOne(rf => rf.Driver)
+					.WithMany(d => d.DriverFeedbacks)
+					.HasForeignKey(rf => rf.DriverID)
+					.OnDelete(DeleteBehavior.NoAction);
+			});
+
+			// Contact configuration (updated to match your model)
+			modelBuilder.Entity<Contact>(entity =>
+			{
+				entity.HasKey(c => c.Id); // Matches your Contact model's Id property
+
+				entity.Property(c => c.Name).IsRequired();
+				entity.Property(c => c.Email).IsRequired();
+				entity.Property(c => c.Message).IsRequired();
+				entity.Property(c => c.PhoneNumber).IsRequired();
+				entity.Property(c => c.SubmittedAt)
+					.HasDefaultValueSql("GETDATE()");
+			});
+
+			// ChatMessage configuration
+			modelBuilder.Entity<ChatMessage>(entity =>
+			{
+				entity.HasKey(cm => cm.Id);
+
+				entity.Property(cm => cm.Timestamp)
+					.HasDefaultValueSql("SYSDATETIME()")
+					.ValueGeneratedOnAdd();
+
+				entity.HasIndex(cm => new { cm.RideID, cm.Timestamp });
+				entity.HasIndex(cm => cm.SenderID);
+
+				entity.HasOne(cm => cm.Ride)
+					.WithMany(r => r.ChatMessages)
+					.HasForeignKey(cm => cm.RideID)
+					.OnDelete(DeleteBehavior.ClientCascade);
+
+				entity.HasOne(cm => cm.Sender)
+					.WithMany(u => u.ChatMessages)
+					.HasForeignKey(cm => cm.SenderID)
+					.OnDelete(DeleteBehavior.ClientNoAction);
+			});
+		}
+
+		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+		{
+			if (!optionsBuilder.IsConfigured)
+			{
+				optionsBuilder.UseSqlServer(
+					"YourConnectionStringHere",
+					options => options.EnableRetryOnFailure(
+						maxRetryCount: 5,
+						maxRetryDelay: TimeSpan.FromSeconds(30),
+						errorNumbersToAdd: null));
+			}
+		}
+	}
 }

@@ -15,5 +15,6 @@
         public virtual Ride Ride { get; set; }
         public virtual User User { get; set; }
         public virtual Driver Driver { get; set; }
-    }
+		public DateTime FeedbackDate { get; set; } = DateTime.Now;
+	}
 }

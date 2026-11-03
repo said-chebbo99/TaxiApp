@@ -482,3 +482,11 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Visual Studio generated files
+.vs/
+bin/
+obj/
+
+# Visual Studio user settings
+*.csproj.user

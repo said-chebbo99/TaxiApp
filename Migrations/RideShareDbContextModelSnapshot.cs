@@ -22,6 +22,38 @@ namespace ProjetInfo.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ProjetInfo.Models.ChatMessage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RideID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SenderID")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("Timestamp")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSDATETIME()");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SenderID");
+
+                    b.HasIndex("RideID", "Timestamp");
+
+                    b.ToTable("ChatMessages");
+                });
+
             modelBuilder.Entity("ProjetInfo.Models.Contact", b =>
                 {
                     b.Property<int>("Id")
@@ -47,7 +79,9 @@ namespace ProjetInfo.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("SubmittedAt")
-                        .HasColumnType("datetime2");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
 
                     b.HasKey("Id");
 
@@ -64,6 +98,9 @@ namespace ProjetInfo.Migrations
 
                     b.Property<bool>("Availability")
                         .HasColumnType("bit");
+
+                    b.Property<double>("AverageRating")
+                        .HasColumnType("float");
 
                     b.Property<double?>("Latitude")
                         .HasColumnType("float");
@@ -120,6 +157,9 @@ namespace ProjetInfo.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RideID"));
+
+                    b.Property<double>("DistanceKm")
+                        .HasColumnType("float");
 
                     b.Property<int?>("DriverID")
                         .HasColumnType("int");
@@ -181,6 +221,9 @@ namespace ProjetInfo.Migrations
 
                     b.Property<int>("DriverID")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("FeedbackDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("Rating")
                         .HasColumnType("int");
@@ -313,6 +356,25 @@ namespace ProjetInfo.Migrations
                     b.ToTable("Vehicles");
                 });
 
+            modelBuilder.Entity("ProjetInfo.Models.ChatMessage", b =>
+                {
+                    b.HasOne("ProjetInfo.Models.Ride", "Ride")
+                        .WithMany("ChatMessages")
+                        .HasForeignKey("RideID")
+                        .OnDelete(DeleteBehavior.ClientCascade)
+                        .IsRequired();
+
+                    b.HasOne("ProjetInfo.Models.User", "Sender")
+                        .WithMany("ChatMessages")
+                        .HasForeignKey("SenderID")
+                        .OnDelete(DeleteBehavior.ClientNoAction)
+                        .IsRequired();
+
+                    b.Navigation("Ride");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("ProjetInfo.Models.Driver", b =>
                 {
                     b.HasOne("ProjetInfo.Models.User", "User")
@@ -425,11 +487,15 @@ namespace ProjetInfo.Migrations
 
             modelBuilder.Entity("ProjetInfo.Models.Ride", b =>
                 {
+                    b.Navigation("ChatMessages");
+
                     b.Navigation("RideFeedbacks");
                 });
 
             modelBuilder.Entity("ProjetInfo.Models.User", b =>
                 {
+                    b.Navigation("ChatMessages");
+
                     b.Navigation("PaymentTransactions");
 
                     b.Navigation("RideFeedbacks");

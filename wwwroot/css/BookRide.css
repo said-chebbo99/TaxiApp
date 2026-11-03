@@ -124,9 +124,10 @@
     transition: 0.3s ease;
 }
 
-#submitRating:hover {
+    #submitRating:hover {
         background: #268c3d;
     }
+
 .driver-card {
     background: #f4f4f4;
     padding: 20px;

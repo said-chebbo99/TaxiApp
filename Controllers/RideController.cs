@@ -35,9 +35,20 @@ namespace ProjetInfo.Controllers
 			if (user == null) return Unauthorized();
 
 			bool isScheduled = scheduledDateTime.HasValue && scheduledDateTime.Value > DateTime.Now;
-
 			double averageSpeedKmh = 40.0;
 			double estimatedTimeMinutes = (distanceKm / averageSpeedKmh) * 60;
+
+			// Calculate base fare (example: $2.50 base + $1.20 per km)
+			decimal baseFare = 2.50m + (decimal)(distanceKm * 1.20);
+			decimal finalFare = baseFare;
+			bool usedDiscount = false;
+
+			// Check if user has enough points for discount
+			if (user.Points >= 50)
+			{
+				finalFare = baseFare * 0.7m; // Apply 30% discount
+				usedDiscount = true;
+			}
 
 			var ride = new Ride
 			{
@@ -47,10 +58,21 @@ namespace ProjetInfo.Controllers
 				RideDateTime = DateTime.Now,
 				ScheduledDateTime = scheduledDateTime,
 				Status = "Pending",
-				EstimatedTimeMinutes = estimatedTimeMinutes
+				EstimatedTimeMinutes = estimatedTimeMinutes,
+				OriginalFare = baseFare,
+				FinalFare = finalFare,
+				UsedLoyaltyDiscount = usedDiscount,
+				DistanceKm = distanceKm
 			};
 
 			_context.Rides.Add(ride);
+
+			// Deduct points if discount was used
+			if (usedDiscount)
+			{
+				user.Points -= 50;
+			}
+
 			_context.SaveChanges();
 
 			return Json(new
@@ -60,7 +82,27 @@ namespace ProjetInfo.Controllers
 				message = isScheduled
 					? "✅ Ride scheduled! A driver can accept your ride from the available rides list."
 					: "✅ Ride booked! A driver can accept your ride from the available rides list.",
-				driver = (object)null
+				fare = finalFare,
+				usedDiscount = usedDiscount,
+				remainingPoints = user.Points
+			});
+		}
+
+		[HttpGet]
+		public IActionResult CheckDiscountEligibility()
+		{
+			var email = User.FindFirst(ClaimTypes.Email)?.Value;
+			var user = _context.Users.FirstOrDefault(u => u.Email == email);
+			if (user == null) return Unauthorized();
+
+			bool isEligible = user.Points >= 50;
+
+			return Json(new
+			{
+				isEligible,
+				currentPoints = user.Points,
+				discountAmount = isEligible ? "30%" : "0%",
+				pointsNeeded = isEligible ? 0 : 50 - user.Points
 			});
 		}
 
@@ -107,6 +149,34 @@ namespace ProjetInfo.Controllers
 				.ToList();
 
 			return Json(drivers);
+		}
+
+		[HttpGet]
+		public IActionResult GetDriverActiveRide()
+		{
+			var email = User.FindFirst(ClaimTypes.Email)?.Value;
+			var user = _context.Users.FirstOrDefault(u => u.Email == email);
+			if (user == null || user.Role != "driver") return Unauthorized();
+
+			var driver = _context.Drivers.FirstOrDefault(d => d.UserID == user.ID);
+			if (driver == null) return NotFound();
+
+			var ride = _context.Rides
+				.Where(r => r.DriverID == driver.DriverID &&
+						   (r.Status == "InProgress" || r.Status == "Accepted"))
+				.OrderByDescending(r => r.RideDateTime)
+				.FirstOrDefault();
+
+			if (ride == null) return NotFound();
+
+			return Json(new
+			{
+				rideID = ride.RideID,
+				status = ride.Status,
+				pickupLocation = ride.PickupLocation,
+				dropOffLocation = ride.DropOffLocation,
+				rideDateTime = ride.RideDateTime
+			});
 		}
 
 		[HttpGet]
@@ -185,7 +255,8 @@ namespace ProjetInfo.Controllers
 					pickupLocation = r.PickupLocation,
 					dropOffLocation = r.DropOffLocation,
 					rideDateTime = r.RideDateTime,
-					estimatedTimeMinutes = r.EstimatedTimeMinutes
+					estimatedTimeMinutes = r.EstimatedTimeMinutes,
+					status = r.Status
 				})
 				.ToList();
 
@@ -226,7 +297,7 @@ namespace ProjetInfo.Controllers
 
 			await _hubContext.Clients.Group($"ride-{rideId}").SendAsync("ReceiveRideStatus", "InProgress");
 
-			return Ok();
+			return Ok(new { message = "Ride accepted successfully!" });
 		}
 
 		[HttpPost]
@@ -241,7 +312,7 @@ namespace ProjetInfo.Controllers
 			var user = ride.User;
 			if (user != null)
 			{
-				user.Points += 10; // Award 10 points per ride
+				user.Points += 10;
 			}
 
 			var driver = _context.Drivers.FirstOrDefault(d => d.DriverID == ride.DriverID);
@@ -255,6 +326,35 @@ namespace ProjetInfo.Controllers
 			await _hubContext.Clients.Group($"ride-{rideId}").SendAsync("ReceiveRideStatus", "Completed");
 
 			return Ok(new { message = "Ride completed and points awarded!" });
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> CancelRide(int rideId)
+		{
+			var email = User.FindFirst(ClaimTypes.Email)?.Value;
+			var user = _context.Users.FirstOrDefault(u => u.Email == email);
+			if (user == null) return Unauthorized();
+
+			var ride = await _context.Rides.FindAsync(rideId);
+			if (ride == null) return NotFound();
+
+			// Only allow cancellation if ride hasn't started
+			if (ride.Status != "Pending" && ride.Status != "Accepted")
+				return BadRequest("Ride cannot be cancelled at this stage");
+
+			ride.Status = "Cancelled";
+			ride.EndTime = DateTime.Now;
+
+			if (ride.DriverID != null)
+			{
+				var driver = await _context.Drivers.FindAsync(ride.DriverID);
+				if (driver != null) driver.Availability = true;
+			}
+
+			await _context.SaveChangesAsync();
+			await _hubContext.Clients.Group($"ride-{rideId}").SendAsync("ReceiveRideStatus", "Cancelled");
+
+			return Ok(new { message = "Ride cancelled successfully" });
 		}
 
 		[HttpGet]
@@ -284,6 +384,9 @@ namespace ProjetInfo.Controllers
 			{
 				status = ride.Status,
 				estimatedTimeMinutes = ride.EstimatedTimeMinutes,
+				originalFare = ride.OriginalFare,
+				finalFare = ride.FinalFare,
+				usedDiscount = ride.UsedLoyaltyDiscount,
 				driver = new
 				{
 					id = driver.DriverID,
@@ -296,6 +399,13 @@ namespace ProjetInfo.Controllers
 					lng = driver.Longitude
 				}
 			});
+		}
+
+		private async Task<bool> IsUserInRide(int userId, int rideId)
+		{
+			return await _context.Rides
+				.AnyAsync(r => r.RideID == rideId &&
+							  (r.UserID == userId || r.DriverID == userId));
 		}
 
 		public IActionResult AboutUs()
