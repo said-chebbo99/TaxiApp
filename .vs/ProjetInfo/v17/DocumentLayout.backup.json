@@ -1,0 +1,141 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\saids\\OneDrive\\Documents\\final project taxi - Copy\\TaxiProject\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{FD4CFF33-E5A8-4D11-80A8-8F7B3E0D5A14}|ProjetInfo.csproj|c:\\users\\saids\\onedrive\\documents\\final project taxi - copy\\taxiproject\\controllers\\ridecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FD4CFF33-E5A8-4D11-80A8-8F7B3E0D5A14}|ProjetInfo.csproj|solutionrelative:controllers\\ridecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FD4CFF33-E5A8-4D11-80A8-8F7B3E0D5A14}|ProjetInfo.csproj|c:\\users\\saids\\onedrive\\documents\\final project taxi - copy\\taxiproject\\models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FD4CFF33-E5A8-4D11-80A8-8F7B3E0D5A14}|ProjetInfo.csproj|solutionrelative:models\\user.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FD4CFF33-E5A8-4D11-80A8-8F7B3E0D5A14}|ProjetInfo.csproj|c:\\users\\saids\\onedrive\\documents\\final project taxi - copy\\taxiproject\\models\\ride.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{FD4CFF33-E5A8-4D11-80A8-8F7B3E0D5A14}|ProjetInfo.csproj|solutionrelative:models\\ride.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{FD4CFF33-E5A8-4D11-80A8-8F7B3E0D5A14}|ProjetInfo.csproj|c:\\users\\saids\\onedrive\\documents\\final project taxi - copy\\taxiproject\\views\\ride\\bookride.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{FD4CFF33-E5A8-4D11-80A8-8F7B3E0D5A14}|ProjetInfo.csproj|solutionrelative:views\\ride\\bookride.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 11,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1ce3aef-c78d-49ee-b72b-ec1fbc908313}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{673a989b-a429-376c-a584-d56b20ce6e41}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{40ea2e6b-2121-4bb8-a43e-c83c04b51041}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "User.cs",
+              "DocumentMoniker": "C:\\Users\\saids\\OneDrive\\Documents\\final project taxi - Copy\\TaxiProject\\Models\\User.cs",
+              "RelativeDocumentMoniker": "Models\\User.cs",
+              "ToolTip": "C:\\Users\\saids\\OneDrive\\Documents\\final project taxi - Copy\\TaxiProject\\Models\\User.cs",
+              "RelativeToolTip": "Models\\User.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAqwC8AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-28T23:07:26.601Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Ride.cs",
+              "DocumentMoniker": "C:\\Users\\saids\\OneDrive\\Documents\\final project taxi - Copy\\TaxiProject\\Models\\Ride.cs",
+              "RelativeDocumentMoniker": "Models\\Ride.cs",
+              "ToolTip": "C:\\Users\\saids\\OneDrive\\Documents\\final project taxi - Copy\\TaxiProject\\Models\\Ride.cs",
+              "RelativeToolTip": "Models\\Ride.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAQwCIAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-28T23:06:56.172Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "RideController.cs",
+              "DocumentMoniker": "C:\\Users\\saids\\OneDrive\\Documents\\final project taxi - Copy\\TaxiProject\\Controllers\\RideController.cs",
+              "RelativeDocumentMoniker": "Controllers\\RideController.cs",
+              "ToolTip": "C:\\Users\\saids\\OneDrive\\Documents\\final project taxi - Copy\\TaxiProject\\Controllers\\RideController.cs",
+              "RelativeToolTip": "Controllers\\RideController.cs",
+              "ViewState": "AgIAAA0AAAAAAAAAAAAYwCwAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-07-28T23:06:13.287Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "BookRide.cshtml",
+              "DocumentMoniker": "C:\\Users\\saids\\OneDrive\\Documents\\final project taxi - Copy\\TaxiProject\\Views\\Ride\\BookRide.cshtml",
+              "RelativeDocumentMoniker": "Views\\Ride\\BookRide.cshtml",
+              "ToolTip": "C:\\Users\\saids\\OneDrive\\Documents\\final project taxi - Copy\\TaxiProject\\Views\\Ride\\BookRide.cshtml",
+              "RelativeToolTip": "Views\\Ride\\BookRide.cshtml",
+              "ViewState": "AgIAAJwDAAAAAAAAAAAuwL8DAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-07-28T23:05:20.283Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 717,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 717,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

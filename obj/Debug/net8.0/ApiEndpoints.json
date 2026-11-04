@@ -1,0 +1,34 @@
+[
+  {
+    "ContainingType": "ProjetInfo.Controllers.ChatController",
+    "Method": "GetChatHistory",
+    "RelativePath": "api/Chat/{rideId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "rideId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ProjetInfo.Controllers.ChatController",
+    "Method": "SendMessage",
+    "RelativePath": "api/Chat/Send",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "messageDto",
+        "Type": "ProjetInfo.Controllers.ChatMessageDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]
